@@ -2,8 +2,10 @@ name: Build and Ship BlazorQ
 
 on:
   push:
-    branches: [ main, develop ]
-    tags: [ 'v*' ] # Triggers when you push a version tag
+    branches: [ main ]
+  release:
+    types: [published]
+  tags: [ 'v*' ]
 
 jobs:
   build-and-deploy:
