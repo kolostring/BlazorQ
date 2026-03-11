@@ -12,6 +12,7 @@
         <PackageTags>blazor;dotnet;state-management;cache;tanstack-query;cqrs;result-pattern;wasm;blazor-server;data-fetching</PackageTags>
         <Copyright>Copyright © 2026 kolostring</Copyright>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <MinVerTagPrefix>v</MinVerTagPrefix>
     </PropertyGroup>
 
     <ItemGroup Condition="'$(TargetFramework)' == 'net8.0'">
