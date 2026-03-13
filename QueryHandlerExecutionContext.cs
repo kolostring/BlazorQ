@@ -2,7 +2,7 @@
 
 namespace BlazorQ;
 
-public class QueryHandlerExecutionContext<TKey> where TKey : ITuple
+public sealed class QueryHandlerExecutionContext<TKey> where TKey : ITuple
 {
     public required TKey Key { get; init; }
     public required IServiceProvider ServiceProvider { get; init; }

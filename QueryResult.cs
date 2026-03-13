@@ -41,7 +41,7 @@ public class QueryResult
         value is not null ? Success(value) : Failure<T>(QueryError.NullValue);
 }
 
-public class QueryResult<T> : QueryResult
+public sealed class QueryResult<T> : QueryResult
 {
     private readonly T? _value;
 

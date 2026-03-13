@@ -2,7 +2,7 @@
 
 namespace BlazorQ;
 
-public class QueryObserver<TKey, TRes> : IDisposable where TKey : ITuple
+public sealed class QueryObserver<TKey, TRes> : IDisposable where TKey : ITuple
 {
     public QueryState<TKey, TRes> Query { get; }
 

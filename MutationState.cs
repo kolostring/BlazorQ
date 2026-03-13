@@ -1,9 +1,9 @@
 ﻿namespace BlazorQ;
 
-public class MutationState<TParams, TResponse>(
+public sealed class MutationState<TParams, TResponse>(
     Func<MutationHandlerExecutionContext<TParams>, Task<QueryResult<TResponse>>> handler,
     IServiceProvider serviceProvider
-) 
+)
 {
     private QueryResult<TResponse>? _result;
     private int _runningMutationsQuantity = 0;

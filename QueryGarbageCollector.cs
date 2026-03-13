@@ -14,7 +14,7 @@ public class QueryGarbageCollector
         _gcInterval = gcInterval ?? TimeSpan.FromMinutes(1);
         StartAsync();
     }
-    
+
     public void RegisterForEviction(ITuple key, CacheOptions cacheOptions)
     {
         var hash = GetHash(key);
@@ -43,11 +43,13 @@ public class QueryGarbageCollector
             }
         }
     }
-    
-    private HashCode GetHash(ITuple key) {
+
+    private static HashCode GetHash(ITuple key)
+    {
         var hash = new HashCode();
 
-        for (int i = 0; i < key.Length; i++) {
+        for (int i = 0; i < key.Length; i++)
+        {
             hash.Add(key[i]);
         }
 

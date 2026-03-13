@@ -1,7 +1,7 @@
 ﻿
 namespace BlazorQ;
 
-public class MutationObserver<TParams, TResponse> : IDisposable
+public sealed class MutationObserver<TParams, TResponse> : IDisposable
 {
     public MutationState<TParams, TResponse> State { get; }
     private readonly Action _onStateChanged;

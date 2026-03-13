@@ -19,12 +19,6 @@ public class QueryClient
         _gc.OnEvictionRequired += HandleEviction;
     }
 
-    private class CacheNode(int keyHashCode)
-    {
-        public int KeyHashCode { get; init; } = keyHashCode;
-        public Dictionary<string, CacheNode> Children { get; set; } = new();
-    }
-
     public QueryState<TKey, TRes> GetOrCreateQuery<TKey, TRes>(
         TKey keySegments,
         Func<QueryHandlerExecutionContext<TKey>, Task<QueryResult<TRes>>> handler,
@@ -63,10 +57,19 @@ public class QueryClient
 
     public void Invalidate(ITuple keySegments)
     {
-        var dictionary = PeekCacheInstance(keySegments);
-        if (dictionary != null)
+        var node = PeekCacheInstance(keySegments);
+        if (node != null)
         {
-            NotifyInvalidationRecursive(dictionary);
+            NotifyInvalidationRecursive(node);
+        }
+    }
+
+    public void Invalidate(string key)
+    {
+        var node = PeekCacheInstance(key);
+        if (node != null)
+        {
+            NotifyInvalidationRecursive(node);
         }
     }
 
@@ -115,7 +118,7 @@ public class QueryClient
         return current.Children.Count == 0 && !_stateLookup.ContainsKey(current.KeyHashCode);
     }
 
-    private CacheNode GetOrCreateCacheInstance(ITuple keySegments)
+    private void GetOrCreateCacheInstance(ITuple keySegments)
     {
         var current = _cacheTrie;
         var hashCode = new HashCode();
@@ -133,15 +136,6 @@ public class QueryClient
 
             current = value;
         }
-
-        return current;
-    }
-
-    private void WireQueryStateWithGarbageCollector<TKey, TResponse>(QueryState<TKey, TResponse> state)
-        where TKey : ITuple
-    {
-        state.OnFirstSubscriberAdded += key => _gc.CancelEviction(key);
-        state.OnLastSubscriberRemoved += (key, cacheOptions) => _gc.RegisterForEviction(key, cacheOptions);
     }
 
     private ICollection<IObservableQueryState> RecursiveQueriesRetrieval(
@@ -181,6 +175,11 @@ public class QueryClient
         return current;
     }
 
+    private CacheNode? PeekCacheInstance(string key)
+    {
+        return _cacheTrie.Children.GetValueOrDefault(key);
+    }
+
     private void NotifyInvalidationRecursive(CacheNode node)
     {
         var state = _stateLookup.GetValueOrDefault(node.KeyHashCode);
@@ -192,7 +191,7 @@ public class QueryClient
         }
     }
 
-    private HashCode GetHash(ITuple key)
+    private static HashCode GetHash(ITuple key)
     {
         var hash = new HashCode();
 
@@ -202,5 +201,18 @@ public class QueryClient
         }
 
         return hash;
+    }
+
+    private sealed class CacheNode(int keyHashCode)
+    {
+        public int KeyHashCode { get; init; } = keyHashCode;
+        public Dictionary<string, CacheNode> Children { get; set; } = new();
+    }
+
+    private void WireQueryStateWithGarbageCollector<TKey, TResponse>(QueryState<TKey, TResponse> state)
+        where TKey : ITuple
+    {
+        state.OnFirstSubscriberAdded += key => _gc.CancelEviction(key);
+        state.OnLastSubscriberRemoved += (key, cacheOptions) => _gc.RegisterForEviction(key, cacheOptions);
     }
 }

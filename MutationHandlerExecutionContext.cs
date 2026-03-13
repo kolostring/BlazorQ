@@ -1,6 +1,6 @@
 ﻿namespace BlazorQ;
 
-public class MutationHandlerExecutionContext<TParams>
+public sealed class MutationHandlerExecutionContext<TParams>
 {
     public TParams Params { get; set; } = default!;
     public IServiceProvider ServiceProvider { get; set; } = default!;

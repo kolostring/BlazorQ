@@ -16,7 +16,7 @@ public static class QueryOptionsFactory
         => new(key, handler, onSuccess, onError, onSettled, enabled);
 }
 
-public record QueryOptions<TKey, TRes>(
+public sealed record QueryOptions<TKey, TRes>(
     TKey Key,
     Func<QueryHandlerExecutionContext<TKey>, Task<QueryResult<TRes>>> Handler,
     Func<TRes, Task>? OnSuccess = null,

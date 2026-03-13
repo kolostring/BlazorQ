@@ -3,7 +3,7 @@ using System.Runtime.CompilerServices;
 
 namespace BlazorQ;
 
-public class QueryPluginHandlersStatelessValidation : IQueryPlugin
+public sealed class QueryPluginHandlersStatelessValidation : IQueryPlugin
 {
     public QueryOptions<TKey, TRes> OnQueryInitialize<TKey, TRes>(QueryOptions<TKey, TRes> queryOptions,
         Func<QueryOptions<TKey, TRes>, QueryOptions<TKey, TRes>> next)

@@ -7,6 +7,6 @@ public static class MutationOptionsFactory
         => new(handler);
 }
 
-public record MutationOptions<TInput, TRes>(
+public sealed record MutationOptions<TInput, TRes>(
     Func<MutationHandlerExecutionContext<TInput>, Task<QueryResult<TRes>>> Handler
 );

@@ -1,3 +1,3 @@
 ﻿namespace BlazorQ;
 
-public record CacheOptions(TimeSpan GcTime);
+public sealed record CacheOptions(TimeSpan GcTime);

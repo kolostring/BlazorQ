@@ -1,3 +1,3 @@
 ﻿namespace BlazorQ;
 
-public record FetchOptions(TimeSpan? RefetchInterval = null, TimeSpan? StaleTime = null);
+public sealed record FetchOptions(TimeSpan? RefetchInterval = null, TimeSpan? StaleTime = null);

@@ -2,7 +2,7 @@
 
 namespace BlazorQ;
 
-public class QueryPluginsPipeline (IEnumerable<IQueryPlugin> plugins)
+public sealed class QueryPluginsPipeline(IEnumerable<IQueryPlugin> plugins)
 {
     public QueryOptions<TKey, TRes> HandleQueryOptions<TKey, TRes>(QueryOptions<TKey, TRes> queryOptions)
         where TKey : ITuple
@@ -11,7 +11,7 @@ public class QueryPluginsPipeline (IEnumerable<IQueryPlugin> plugins)
         foreach (var plugin in plugins.Reverse())
         {
             var localNext = pipeline;
-            
+
             pipeline = (opt) => plugin.OnQueryInitialize(opt, localNext);
         }
 

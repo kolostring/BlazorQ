@@ -8,7 +8,7 @@ public enum QueryStatus
     Fetching
 }
 
-public class QueryState<TKey, TResponse>(
+public sealed class QueryState<TKey, TResponse>(
     TKey key,
     Func<QueryHandlerExecutionContext<TKey>, Task<QueryResult<TResponse>>> handler,
     CacheOptions cacheOptions,
@@ -22,7 +22,7 @@ public class QueryState<TKey, TResponse>(
 
     private int _observersCount = 0;
     private DateTimeOffset _lastUpdatedAt = DateTimeOffset.MinValue;
-    public CacheOptions _cacheOptions = cacheOptions;
+    private CacheOptions _cacheOptions = cacheOptions;
 
     public event Action? OnChanged;
     public event Action? OnInvalidated;
@@ -55,8 +55,8 @@ public class QueryState<TKey, TResponse>(
 
     public bool IsIdle => _status == QueryStatus.Idle;
     public bool IsFetching => _status == QueryStatus.Fetching;
-    public bool IsLoading => IsFetching && _result == null;
     public bool IsPending => _result == null;
+    public bool IsLoading => IsFetching && IsPending;
     public bool IsError => IsIdle && _result?.IsFailure == true;
     public bool IsSuccess => IsIdle && _result?.IsSuccess == true;
     public bool CanFetch => IsIdle && _observersCount > 0;
