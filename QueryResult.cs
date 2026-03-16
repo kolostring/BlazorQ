@@ -4,6 +4,15 @@ public abstract record QueryResult<T>
 {
   public sealed record Success(T Value) : QueryResult<T>;
   public sealed record Failure(QueryError Error) : QueryResult<T>;
+  
+  public static implicit operator QueryResult<T>(T value) => new Success(value);
+  public static implicit operator QueryResult<T>(QueryError error) => new Failure(error);
+}
+
+public static class QueryResult
+{
+  public static QueryResult<T>.Success Success<T>(T value) => new(value);
+  public static QueryResult<T>.Failure Failure<T>(QueryError error) => new(error);
 }
 
 public sealed record QueryError(string Code, string Message)
