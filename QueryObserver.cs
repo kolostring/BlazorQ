@@ -42,8 +42,13 @@ public sealed class QueryObserver<TKey, TRes> : IDisposable where TKey : ITuple
         Query = query;
         _onStateChanged = onStateChanged;
         _linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cts.Token);
-        _options = options;
         _enabled = enabled;
+        _options = options with
+        {
+            RetryDelay = options.RetryDelay ?? (attemptIndex => TimeSpan.FromMilliseconds(
+                Math.Min(1000 * Math.Pow(2, attemptIndex), 30000)
+            ))
+        };
 
         Query.OnChanged += HandleChange;
         Query.OnInvalidated += HandleInvalidation;
@@ -63,7 +68,7 @@ public sealed class QueryObserver<TKey, TRes> : IDisposable where TKey : ITuple
             while (!_isDisposed && !_linkedCts.IsCancellationRequested)
             {
                 await Task.Delay(interval.Value, _linkedCts.Token);
-                Run();
+                _ = Run();
             }
         }, _linkedCts.Token);
     }
@@ -75,14 +80,14 @@ public sealed class QueryObserver<TKey, TRes> : IDisposable where TKey : ITuple
             return;
         }
 
-        _onStateChanged?.Invoke();
+        _onStateChanged.Invoke();
     }
 
     private void HandleInvalidation()
     {
         if (_isDisposed) return;
 
-        Run();
+        _ = Run();
     }
 
     public void RunIfStale()
@@ -100,7 +105,7 @@ public sealed class QueryObserver<TKey, TRes> : IDisposable where TKey : ITuple
     {
         if (Query.CanFetch && Enabled)
         {
-            await Query.Run(_linkedCts.Token);
+            await RunQueryWithRetry();
             bool isCancelled = _linkedCts.IsCancellationRequested;
 
             if (!isCancelled && Query.IsSuccess && OnSuccess is not null)
@@ -119,6 +124,22 @@ public sealed class QueryObserver<TKey, TRes> : IDisposable where TKey : ITuple
                 await OnSettled(Query.Res!);
                 HandleChange();
             }
+        }
+    }
+
+    private async Task RunQueryWithRetry()
+    {
+        for (int attempt = 0; attempt <= _options.Retry; attempt++)
+        {
+            if (attempt > 0)
+            {
+                await Task.Delay(_options.RetryDelay!(attempt - 1), _linkedCts.Token);
+            }
+
+            await Query.Run(_linkedCts.Token);
+
+            if (Query.IsSuccess || _linkedCts.IsCancellationRequested)
+                break;
         }
     }
 
