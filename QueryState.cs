@@ -29,8 +29,8 @@ public sealed class QueryState<TKey, TResponse>(
     public event Action<TKey, CacheOptions>? OnLastSubscriberRemoved;
     public event Action<TKey>? OnFirstSubscriberAdded;
 
-    public TResponse? Data => _result == null ? default : _result.Value;
-    public QueryError? Error => _result?.Error;
+    public TResponse? Data => _result is QueryResult<TResponse>.Success s ? s.Value : default;
+    public QueryError? Error => _result is QueryResult<TResponse>.Failure f ? f.Error : null;
 
     public QueryResult<TResponse>? Res
     {
@@ -39,7 +39,7 @@ public sealed class QueryState<TKey, TResponse>(
 
     public void SetData(TResponse data)
     {
-        _result = QueryResult.Success(data);
+        _result = new QueryResult<TResponse>.Success(data);
         _status = QueryStatus.Idle;
         _lastUpdatedAt = DateTimeOffset.UtcNow;
         NotifyChanged();
@@ -57,8 +57,8 @@ public sealed class QueryState<TKey, TResponse>(
     public bool IsFetching => _status == QueryStatus.Fetching;
     public bool IsPending => _result == null;
     public bool IsLoading => IsFetching && IsPending;
-    public bool IsError => IsIdle && _result?.IsFailure == true;
-    public bool IsSuccess => IsIdle && _result?.IsSuccess == true;
+    public bool IsError => IsIdle && _result is QueryResult<TResponse>.Failure;
+    public bool IsSuccess => IsIdle && _result is QueryResult<TResponse>.Success;
     public bool CanFetch => IsIdle && _observersCount > 0;
 
     public DateTimeOffset LastUpdatedAt => _lastUpdatedAt;
