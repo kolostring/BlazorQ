@@ -11,8 +11,8 @@ public abstract record QueryResult<T>
 
 public static class QueryResult
 {
-  public static QueryResult<T>.Success Success<T>(T value) => new(value);
-  public static QueryResult<T>.Failure Failure<T>(QueryError error) => new(error);
+  public static QueryResult<T> Success<T>(T value) => new QueryResult<T>.Success(value);
+  public static QueryResult<T> Failure<T>(QueryError error) => new QueryResult<T>.Failure(error);
 }
 
 public sealed record QueryError(string Code, string Message)
